@@ -17,7 +17,13 @@ def generate_prompt(message, folders, show_prompt=False):
 
     stripped_folders = get_stripped_folder_list(folders)
 
-    system_prompt = "You are an email classifier.  I will give you an email and you will respond with a single word, that being the name of the best folder for that email.  If an email seems genuine, or too hard, please respond with 'inbox'.  Do not summarize the email; just respond with a single word.\n"
+    system_prompt = "You are an email classifier.  I will give you an email, "
+    system_prompt += "and you will respond with a the name of the best folder "
+    system_prompt += "for that email, followed by a colon and a space.  If an "
+    system_prompt += "email seems genuine, or too hard, please respond with "
+    system_prompt += "'inbox'.  After the colon and space, please provide a "
+    system_prompt += "brief explanation of why you chose that folder. "
+
     system_prompt += f"The available folders are: {', '.join(stripped_folders)}\n"
 
     prompt = f"Email Subject: {message['subject']}\n"
@@ -31,7 +37,7 @@ def generate_prompt(message, folders, show_prompt=False):
 
     return (system_prompt, prompt)
 
-def get_ai_response(prompt, system_prompt):
+def get_ai_response(prompt, system_prompt, folders):
     try:
 
         response = openai.chat.completions.create(
@@ -48,12 +54,23 @@ def get_ai_response(prompt, system_prompt):
             ],
         )
 
-        return response.choices[0].message.content
+        message = response.choices[0].message.content
+        print(f"AI Response: {message}")
 
     except Exception as e:
         print(f"Error in calling OpenAI API: {e}")
         exit()
 
+    # split the parts on the first colon and space
+    (folder, explanation) = message.split(': ', 1)
+
+    # check if the folder is valid
+    if folder not in folders:
+        return ("invalid", response)
+
+    return (str(folder), str(explanation))
+
+
 def get_ai_response_from_message(message, folders, show_prompt=False):
     system_prompt, prompt = generate_prompt(message, folders, show_prompt)
-    return get_ai_response(prompt, system_prompt)
+    return get_ai_response(prompt, system_prompt, folders)

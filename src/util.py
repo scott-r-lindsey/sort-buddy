@@ -1,3 +1,4 @@
+import json
 import os
 import re
 
@@ -20,4 +21,12 @@ def safe_decode(byte_content):
         return byte_content.decode('utf-8')
     except UnicodeDecodeError:
         return byte_content.decode('latin-1', errors='replace')
+
+def save_results_to_json(ai_folders, messages, filename):
+    results = {
+        "ai_folders": ai_folders,
+        "messages": messages
+    }
+    with open(filename, 'w') as file:
+        json.dump(results, file, indent=4)
 
