@@ -2,13 +2,12 @@ import argparse
 import os
 import signal
 import sys
-import json
 from datetime import datetime
 from dotenv import load_dotenv
 from email_fetcher import EmailFetcher
 from json_email_fetcher import JSONEmailFetcher
 from ai import get_ai_response_from_message, configure_openai
-from util import get_stripped_folder_list
+from util import get_stripped_folder_list, save_results_to_json
 
 load_dotenv()
 
@@ -16,19 +15,12 @@ def signal_handler(signal, frame):
     print("\nExiting...")
     sys.exit(0)
 
-def save_results_to_json(ai_folders, messages, filename):
-    results = {
-        "ai_folders": ai_folders,
-        "messages": messages
-    }
-    with open(filename, 'w') as file:
-        json.dump(results, file, indent=4)
-
 def main(dry_run=False, show_prompt=False, limit=None, save_to_json=None, use_json=None):
     configure_openai()
 
     if use_json:
         fetcher = JSONEmailFetcher(use_json)
+        dry_run = True
     else:
         fetcher = EmailFetcher()
 
@@ -51,15 +43,16 @@ def main(dry_run=False, show_prompt=False, limit=None, save_to_json=None, use_js
         print(f"From: {message['from']}")
         print(f"Subject: {message['subject']}")
 
-        response = get_ai_response_from_message(message, formatted_inboxes, show_prompt)
+        folder, explanation = get_ai_response_from_message(message, formatted_inboxes, show_prompt)
 
         print('-' * 80)
-        print(f" --> {response}")
+        print(f" --> {folder}: {explanation}")
 
         response_data = {
             "datetime": datetime.now().isoformat(),
             "model": os.getenv("OPENAI_MODEL"),
-            "response": response
+            "folder": folder,
+            "explanation": explanation,
         }
 
         message["responses"].append(response_data)
@@ -67,10 +60,12 @@ def main(dry_run=False, show_prompt=False, limit=None, save_to_json=None, use_js
         messages.append(message)
 
         if not dry_run:
-            if response == "inbox":
+            if folder == "inbox":
                 print("Leaving message in inbox.")
-            elif response in formatted_inboxes:
-                fetcher.move_message(message["id"], response)
+            elif folder == "invalid":
+                print("AI failure: Leaving message in inbox.")
+            elif folder in formatted_inboxes:
+                fetcher.move_message(message["id"], f"{os.getenv('FOLDER_PREFIX')}{folder}")
             else:
                 print("Received invalid response, please review manually.")
 
