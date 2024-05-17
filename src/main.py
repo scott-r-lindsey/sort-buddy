@@ -91,7 +91,7 @@ if __name__ == "__main__":
     parser.add_argument("--limit", type=int, help="Limit the number of messages to process.")
     parser.add_argument("--save-to-json", type=str, help="Save the results to a JSON file.")
     parser.add_argument("--use-json", type=str, help="Use a JSON file for input instead of connecting to IMAP.")
-    parser.add_argument("--print-rate-limits", type=bool, help="Show the rate limits header from the OpenAI API response.")
+    parser.add_argument("--print-rate-limits", action="store_true", help="Show the rate limits header from the OpenAI API response.")
     args = parser.parse_args()
 
     main(
