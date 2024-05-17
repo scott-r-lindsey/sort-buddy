@@ -26,11 +26,13 @@ def main(
     else:
         fetcher = EmailFetcher()
 
+    print('-' * 80)
     print(f"Fetching list of folders that start with {os.getenv('FOLDER_PREFIX')}...")
     ai_folders = fetcher.list_ai_folders()
 
     formatted_inboxes = get_stripped_folder_list(ai_folders)
     messages = []
+    print(f"Found {len(ai_folders)} folders: {ai_folders}")
 
     count = 0
     while fetcher.has_more_messages():
@@ -47,7 +49,6 @@ def main(
 
         folder, explanation = get_ai_response_from_message(message, formatted_inboxes, show_prompt, show_rate_limits)
 
-        print('-' * 80)
         print(f" --> {folder}: {explanation}")
 
         response_data = {
@@ -73,6 +74,10 @@ def main(
 
         count += 1
 
+    print('-' * 80)
+    print(f"Processed {count} messages.")
+    print('-' * 80)
+
     if save_to_json:
         save_results_to_json(ai_folders, messages, save_to_json)
         print(f"Results saved to {save_to_json}")
@@ -86,7 +91,7 @@ if __name__ == "__main__":
     parser.add_argument("--limit", type=int, help="Limit the number of messages to process.")
     parser.add_argument("--save-to-json", type=str, help="Save the results to a JSON file.")
     parser.add_argument("--use-json", type=str, help="Use a JSON file for input instead of connecting to IMAP.")
-    parser.add_argument("--print-rate-limits", type=str, help="Show the rate limits header from the OpenAI API response.")
+    parser.add_argument("--print-rate-limits", type=bool, help="Show the rate limits header from the OpenAI API response.")
     args = parser.parse_args()
 
     main(

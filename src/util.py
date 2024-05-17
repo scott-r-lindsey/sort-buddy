@@ -2,7 +2,6 @@ import json
 import os
 import re
 import sys
-import signal
 
 def remove_prefix(folder_name):
     if folder_name.startswith(os.environ.get("FOLDER_PREFIX")):
