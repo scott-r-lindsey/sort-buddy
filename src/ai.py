@@ -55,18 +55,23 @@ def get_ai_response(prompt, system_prompt, folders):
         )
 
         message = response.choices[0].message.content
-        print(f"AI Response: {message}")
 
     except Exception as e:
         print(f"Error in calling OpenAI API: {e}")
         exit()
 
-    # split the parts on the first colon and space
-    (folder, explanation) = message.split(': ', 1)
+    try:
+        # split the parts on the first colon and space
+        (folder, explanation) = message.split(': ', 1)
+        folder = folder.strip()
+
+    except ValueError:
+        # if the split fails, the response is invalid
+        return ("invalid", "could not split response")
 
     # check if the folder is valid
     if folder not in folders:
-        return ("invalid", response)
+        return ("invalid", explanation)
 
     return (str(folder), str(explanation))
 
