@@ -63,7 +63,7 @@ def main(
         messages.append(message)
 
         if not dry_run:
-            if folder == "inbox":
+            if folder == "Inbox":
                 print("Leaving message in inbox.")
             elif folder == "invalid":
                 print("AI failure: Leaving message in inbox.")
