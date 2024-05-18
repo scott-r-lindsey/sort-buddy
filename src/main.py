@@ -1,21 +1,23 @@
 import argparse
 import os
 import signal
-import sys
 from datetime import datetime
 from dotenv import load_dotenv
 from email_fetcher import EmailFetcher
 from json_email_fetcher import JSONEmailFetcher
 from ai import get_ai_response_from_message, configure_openai
-from util import get_stripped_folder_list, save_results_to_json
+from util import get_stripped_folder_list, save_results_to_json, signal_handler
 
 load_dotenv()
 
-def signal_handler(signal, frame):
-    print("\nExiting...")
-    sys.exit(0)
+def main(
+        dry_run=False,
+        show_prompt=False,
+        limit=None,
+        save_to_json=None,
+        use_json=None,
+        show_rate_limits=False):
 
-def main(dry_run=False, show_prompt=False, limit=None, save_to_json=None, use_json=None):
     configure_openai()
 
     if use_json:
@@ -24,11 +26,13 @@ def main(dry_run=False, show_prompt=False, limit=None, save_to_json=None, use_js
     else:
         fetcher = EmailFetcher()
 
+    print('-' * 80)
     print(f"Fetching list of folders that start with {os.getenv('FOLDER_PREFIX')}...")
     ai_folders = fetcher.list_ai_folders()
 
     formatted_inboxes = get_stripped_folder_list(ai_folders)
     messages = []
+    print(f"Found {len(ai_folders)} folders: {ai_folders}")
 
     count = 0
     while fetcher.has_more_messages():
@@ -43,9 +47,8 @@ def main(dry_run=False, show_prompt=False, limit=None, save_to_json=None, use_js
         print(f"From: {message['from']}")
         print(f"Subject: {message['subject']}")
 
-        folder, explanation = get_ai_response_from_message(message, formatted_inboxes, show_prompt)
+        folder, explanation = get_ai_response_from_message(message, formatted_inboxes, show_prompt, show_rate_limits)
 
-        print('-' * 80)
         print(f" --> {folder}: {explanation}")
 
         response_data = {
@@ -60,7 +63,7 @@ def main(dry_run=False, show_prompt=False, limit=None, save_to_json=None, use_js
         messages.append(message)
 
         if not dry_run:
-            if folder == "inbox":
+            if folder == "Inbox":
                 print("Leaving message in inbox.")
             elif folder == "invalid":
                 print("AI failure: Leaving message in inbox.")
@@ -70,6 +73,10 @@ def main(dry_run=False, show_prompt=False, limit=None, save_to_json=None, use_js
                 print("Received invalid response, please review manually.")
 
         count += 1
+
+    print('-' * 80)
+    print(f"Processed {count} messages.")
+    print('-' * 80)
 
     if save_to_json:
         save_results_to_json(ai_folders, messages, save_to_json)
@@ -84,7 +91,14 @@ if __name__ == "__main__":
     parser.add_argument("--limit", type=int, help="Limit the number of messages to process.")
     parser.add_argument("--save-to-json", type=str, help="Save the results to a JSON file.")
     parser.add_argument("--use-json", type=str, help="Use a JSON file for input instead of connecting to IMAP.")
+    parser.add_argument("--print-rate-limits", action="store_true", help="Show the rate limits header from the OpenAI API response.")
     args = parser.parse_args()
 
-    main(dry_run=args.dry_run, show_prompt=args.show_prompt, limit=args.limit, save_to_json=args.save_to_json, use_json=args.use_json)
+    main(
+        dry_run=args.dry_run,
+        show_prompt=args.show_prompt,
+        limit=args.limit,
+        save_to_json=args.save_to_json,
+        use_json=args.use_json,
+        show_rate_limits=args.print_rate_limits)
 

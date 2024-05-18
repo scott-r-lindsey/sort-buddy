@@ -1,6 +1,7 @@
 import json
 import os
 import re
+import sys
 
 def remove_prefix(folder_name):
     if folder_name.startswith(os.environ.get("FOLDER_PREFIX")):
@@ -29,4 +30,8 @@ def save_results_to_json(ai_folders, messages, filename):
     }
     with open(filename, 'w') as file:
         json.dump(results, file, indent=4)
+
+def signal_handler(signal, frame):
+    print("\nExiting...")
+    sys.exit(0)
 
