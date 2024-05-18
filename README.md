@@ -11,9 +11,13 @@ This is a very simple python program that leverages OpenAI or Ollama to classify
 - Supports a dry-run mode to simulate processing without actual folder movement.
 - Can optionally display prompts used to query AI for debugging. 
 
+## Performance
+In my testing, ChatGPT-4o has given me extremly good results at a cost of about $0.005 per email (one half of one cent).  This is much higher than the cost of using a purpose built model, but the ease and flexibility of doing it this way is amazing.
+I have also tested with various local models via [Ollama](https://ollama.com/), but acheiving a result that competes with ChatGPT-4o is difficult.
+
 ## Prerequisites
 - Python 3.8+
-- [https://python-poetry.org/](Poetry) for dependency management
+- [Poetry](https://python-poetry.org/) for dependency management
 - IMAP email credentials
 
 ## Setup
@@ -37,7 +41,7 @@ cp .env.dist .env
   - Fill in the .env file with your IMAP email credentials, AI key (OpenAI or Ollama), and folder prefix.
 ```
 
-# Running the Project
+## Running the Project
   - To execute the project, you can use the provided run.sh shell script:
 ```bash
 ./run.sh --dry-run
@@ -49,10 +53,14 @@ poetry run python main.py --dry-run --show-prompt
 ```
   - --dry-run: Print prompts and messages without moving any emails.
   - --show-prompt: Display the AI prompt, minus the email body.
+  - --limit: Max number of messages to process.
+  - --save-to-json: Save messages and the resulting sort to a file, for benchmarking different LLMs.
+  - --use-json: Instead of connecting to an IMAP server, use a previously saved file as input.
+  - --print-rate-limits: Output the [rate limit](https://platform.openai.com/docs/guides/rate-limits) headers provided by OpenAI.
 
-# Contribution
+## Contribution
 Feel free to submit issues or pull requests to improve the functionality.
 
-# License
+## License
 
 This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
