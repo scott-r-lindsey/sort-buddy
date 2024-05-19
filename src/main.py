@@ -65,14 +65,19 @@ def main(
         if not dry_run:
             if folder == "Inbox":
                 print("Leaving message in inbox.")
+
             elif folder == "invalid":
                 print("AI failure: Leaving message in inbox.")
+
             elif folder in formatted_inboxes:
                 fetcher.move_message(message["id"], f"{os.getenv('FOLDER_PREFIX')}{folder}")
+
             else:
                 print("Received invalid response, please review manually.")
 
         count += 1
+
+    fetcher.close()
 
     print('-' * 80)
     print(f"Processed {count} messages.")

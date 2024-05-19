@@ -28,7 +28,14 @@ class JSONEmailFetcher:
     def has_more_messages(self):
         return self.current_index < len(self.messages)
 
+    def set_unseen(self, message_id):
+        # No-op for JSON data, but could log or print an action
+        print(f"Message {message_id} would be marked as unseen in a real environment.")
+
     def move_message(self, message_id, target_folder):
         # No-op for JSON data, but could log or print an action
         print(f"Message {message_id} would be moved to {target_folder} in a real environment.")
 
+    def close(self):
+        # No-op for JSON data, but could log or print an action
+        print("Closing JSON email fetcher.")
