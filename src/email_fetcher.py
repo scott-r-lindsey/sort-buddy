@@ -6,10 +6,11 @@ from util import limit_consecutive_linefeeds, safe_decode
 
 class EmailFetcher:
 
-    def __init__(self):
+    def __init__(self, dry_run=False):
         self.host = os.getenv("IMAP_HOST")
         self.username = os.getenv("EMAIL_USERNAME")
         self.password = os.getenv("EMAIL_PASSWORD")
+        self.dry_run = dry_run
 
         self.imapclient = IMAPClient(self.host, ssl=True)
         self.imapclient.login(self.username, self.password)
@@ -75,7 +76,8 @@ class EmailFetcher:
         }
 
     def add_flag(self, message_id, flag):
-        self.imapclient.add_flags(message_id, [flag])
+        if not self.dry_run:
+            self.imapclient.add_flags(message_id, [flag])
 
     def has_flag(self, message_id, flag):
         return flag in self.imapclient.get_flags(message_id)

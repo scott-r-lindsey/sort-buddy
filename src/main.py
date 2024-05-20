@@ -24,7 +24,7 @@ def main(
         fetcher = JSONEmailFetcher(use_json)
         dry_run = True
     else:
-        fetcher = EmailFetcher()
+        fetcher = EmailFetcher(dry_run)
 
     print('-' * 80)
     print(f"Fetching list of folders that start with {os.getenv('FOLDER_PREFIX')}...")
