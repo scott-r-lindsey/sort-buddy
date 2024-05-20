@@ -1,3 +1,4 @@
+from colorama import Fore, Style
 import json
 import os
 import re
@@ -35,3 +36,11 @@ def signal_handler(signal, frame):
     print("\nExiting...")
     sys.exit(0)
 
+def get_terminal_width():
+    try:
+        return os.get_terminal_size().columns
+    except OSError:
+        return 80
+
+def print_line():
+    print(Fore.YELLOW + "-" * get_terminal_width() + Style.RESET_ALL)

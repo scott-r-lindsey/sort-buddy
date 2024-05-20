@@ -1,24 +1,27 @@
 import argparse
 import os
 import signal
+from colorama import Fore, Style, init as colorama_init
 from datetime import datetime
 from dotenv import load_dotenv
 from email_fetcher import EmailFetcher
 from json_email_fetcher import JSONEmailFetcher
 from ai import get_ai_response_from_message, configure_openai
-from util import get_stripped_folder_list, save_results_to_json, signal_handler
+from util import get_stripped_folder_list, save_results_to_json, signal_handler, print_line
 
 load_dotenv()
 
 def main(
         dry_run=False,
         show_prompt=False,
+        no_color=False,
         limit=None,
         save_to_json=None,
         use_json=None,
         show_rate_limits=False):
 
     configure_openai()
+    colorama_init(strip=no_color)
 
     if use_json:
         fetcher = JSONEmailFetcher(use_json)
@@ -26,7 +29,7 @@ def main(
     else:
         fetcher = EmailFetcher(dry_run)
 
-    print('-' * 80)
+    print_line()
     print(f"Fetching list of folders that start with {os.getenv('FOLDER_PREFIX')}...")
     ai_folders = fetcher.list_ai_folders()
 
@@ -43,13 +46,13 @@ def main(
         if not message:
             continue
 
-        print('-' * 80)
-        print(f"From: {message['from']}")
-        print(f"Subject: {message['subject']}")
+        print_line()
+        print(f"{Fore.BLUE}From:{Style.RESET_ALL} {Fore.CYAN}{message['from']}{Style.RESET_ALL}")
+        print(f"{Fore.BLUE}Subject:{Style.RESET_ALL} {Fore.CYAN}{message['subject']}{Style.RESET_ALL}")
 
         folder, explanation = get_ai_response_from_message(message, formatted_inboxes, show_prompt, show_rate_limits)
 
-        print(f" --> {folder}: {explanation}")
+        print(f" --> {Fore.GREEN}{folder}{Style.RESET_ALL}: {Fore.WHITE}{explanation}{Style.RESET_ALL}")
 
         response_data = {
             "datetime": datetime.now().isoformat(),
@@ -79,9 +82,9 @@ def main(
 
     fetcher.close()
 
-    print('-' * 80)
+    print_line()
     print(f"Processed {count} messages.")
-    print('-' * 80)
+    print_line()
 
     if save_to_json:
         save_results_to_json(ai_folders, messages, save_to_json)
@@ -93,6 +96,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Parse emails and process them.")
     parser.add_argument("--dry-run", action="store_true", help="Only print prompts and messages without processing them.")
     parser.add_argument("--show-prompt", action="store_true", help="Show the prompt, minus the body of the email.")
+    parser.add_argument("--no-color", action="store_true", help="Disable color output.")
     parser.add_argument("--limit", type=int, help="Limit the number of messages to process.")
     parser.add_argument("--save-to-json", type=str, help="Save the results to a JSON file.")
     parser.add_argument("--use-json", type=str, help="Use a JSON file for input instead of connecting to IMAP.")
@@ -102,6 +106,7 @@ if __name__ == "__main__":
     main(
         dry_run=args.dry_run,
         show_prompt=args.show_prompt,
+        no_color=args.no_color,
         limit=args.limit,
         save_to_json=args.save_to_json,
         use_json=args.use_json,
