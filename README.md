@@ -2,7 +2,7 @@
 
 This is a very simple python program that leverages OpenAI or Ollama to classify and organize emails based on their content. The system connects to an IMAP email server, retrieves unread emails, and uses AI to decide the most suitable folder to store them in.
 
-[![asciicast](https://asciinema.org/a/4acaOzAWasgMqqvpMAGeQUppc.svg)](https://asciinema.org/a/4acaOzAWasgMqqvpMAGeQUppc)
+[![asciicast](https://asciinema.org/a/85fD67bwW0XsejSPXIo92QTaT.svg)](https://asciinema.org/a/85fD67bwW0XsejSPXIo92QTaT)
 
 ## Features
 
