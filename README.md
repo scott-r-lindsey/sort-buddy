@@ -25,7 +25,7 @@ I have also tested with various local models via [Ollama](https://ollama.com/), 
 
 ```bash
 git clone git@github.com:scott-r-lindsey/ai-email.git
-cd ai-email
+cd sort-buddy
 ```
 
 2. Install dependencies using Poetry:
@@ -40,6 +40,9 @@ poetry install
 cp .env.dist .env
   - Fill in the .env file with your IMAP email credentials, AI key (OpenAI or Ollama), and folder prefix.
 ```
+
+## Before Running the Project
+  - Open your email client, and create some special folders with names that start with "AI-", or another prefix as you have selected in the .env configuraiton step.  I like "AI-Span", "AI-Important", and "AI-Mailing-List", but these categories can be whatever you like.
 
 ## Running the Project
   - To execute the project, you can use the provided run.sh shell script:
